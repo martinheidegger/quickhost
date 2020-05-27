@@ -1,0 +1,30 @@
+{
+  "name": "quickhost",
+  "version": "1.0.0",
+  "description": "Hosts html files temporarily based on a max amount of size in a LRU cache. Allows upload using secret keys.",
+  "main": "upload.js",
+  "bin": {
+    "quickhost": "./bin/quickhost"
+  },
+  "scripts": {
+    "test": "npm run test:lint && npm run test:unit",
+    "test:lint": "standard",
+    "test:unit": "tap test.js",
+    "start": "./bin/quickhost"
+  },
+  "keywords": [
+    "browserstack", "hosting", "test", "tape", "browsertest"
+  ],
+  "author": "Martin Heidegger <martin.heidegger@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "abortcontroller-polyfill": "^1.4.0",
+    "lru": "^3.1.0"
+  },
+  "devDependencies": {
+    "node-fetch": "^2.6.0",
+    "p-series": "^2.1.0",
+    "standard": "^14.3.4",
+    "tap": "^14.10.7"
+  }
+}

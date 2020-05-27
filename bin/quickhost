@@ -1,0 +1,41 @@
+#!/usr/bin/env node
+
+const { AbortController } = require('abortcontroller-polyfill/dist/cjs-ponyfill')
+const createServer = require('../server.js')
+const control = new AbortController()
+const abortSignal = control.signal
+process.on('SIGINT', () => control.abort())
+
+console._log = console.log
+console.log = function (...args) {
+  args = args.map(entry => entry instanceof Error ? entry.code ? { code: entry.code } : entry.stack : entry)
+  if (args.length === 1) {
+    args = args[0]
+  }
+  this._log(JSON.stringify(args))
+}
+console._error = console.error
+console.error = function (...args) {
+  args = args.map(entry => entry instanceof Error ? entry.code ? { code: entry.code } : entry.stack : entry)
+  if (args.length === 1) {
+    args = args[0]
+  }
+  this._error(JSON.stringify(args))
+}
+
+;(async () => {
+  const { closePromise, address, secret } = await createServer({
+    abortSignal,
+    secret: process.env.QUICKHOST_SECRET,
+    max: parseInt(process.env.QUICKHOST_MAX || 10, 10),
+    maxSize: parseInt(process.env.QUICKHOST_MAX_SIZE || 1024 * 1024 * 3 /* 3 Megabytes */, 10),
+    host: process.env.HOST,
+    port: process.env.PORT || 9999
+  })
+  console.log(address)
+  console.log({ secret })
+  await closePromise
+})().catch(err => {
+  console.error(err)
+  process.exit(1)
+})
