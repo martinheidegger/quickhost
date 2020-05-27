@@ -30,7 +30,7 @@ $ env \
 
 Once the server is running you can upload and download files from that server using a simple API:
 
-1. `npm install quickhost`
+1. `npm install @leichtgewicht/quickhost`
 2. 
     ```javascript
     const upload = require('quickhost')

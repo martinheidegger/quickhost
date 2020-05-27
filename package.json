@@ -1,5 +1,5 @@
 {
-  "name": "quickhost",
+  "name": "@leichtgewicht/quickhost",
   "version": "1.0.0",
   "description": "Hosts html files temporarily based on a max amount of size in a LRU cache. Allows upload using secret keys.",
   "main": "upload.js",
