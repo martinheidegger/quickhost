@@ -1,6 +1,8 @@
 const { createServer } = require('http')
 const { randomBytes } = require('crypto')
 const createLRU = require('lru')
+const JSON_TYPE = { 'Content-Type': 'application/json' }
+const TEXT_TYPE = { 'Content-Type': 'text/text' }
 
 function res404 (res) {
   res.writeHead(404).end('404 - not found', 'utf-8')
@@ -32,7 +34,7 @@ module.exports = ({ abortSignal, host, port, max, maxAge, maxSize, timeout, secr
       clearTimeout(timer)
       timer = setTimeout(() => {
         finish()
-        res.writeHead(408).end('408 - timeout')
+        res.writeHead(408, JSON_TYPE).end(JSON.stringify({ code: 408, message: 'timeout', timeout }, null, 2))
       }, timeout)
     }
     const onData = data => {
@@ -40,7 +42,7 @@ module.exports = ({ abortSignal, host, port, max, maxAge, maxSize, timeout, secr
       size += data.byteLength
       if (size > maxSize) {
         finish()
-        res.writeHead(413).end('413 - payload too large')
+        res.writeHead(413, JSON_TYPE).end(JSON.stringify({ code: 413, message: 'payload too large', size, maxSize }, null, 2))
         return
       }
       buffer.push(data)

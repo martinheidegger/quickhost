@@ -35,7 +35,8 @@ module.exports = ({ server, secret, data, timeout }) => {
           res.off('end', onResEnd)
           res.off('data', onData)
           if (res.statusCode !== 200) {
-            onEnd(Object.assign(new Error(`[EHTTPSTATUS] ${res.statusCode}: ${Buffer.concat(result).toString()}`), { statusCode: res.statusCode, code: 'EHTTPSTATUS' }))
+            const message = Buffer.concat(result).toString()
+            onEnd(Object.assign(new Error(`[EHTTPSTATUS] ${res.statusCode}: ${message}`), { statusCode: res.statusCode, code: 'EHTTPSTATUS', message }))
           } else {
             onEnd(error)
           }

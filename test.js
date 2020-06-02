@@ -84,6 +84,7 @@ test('uploading too much', async t => {
   } catch (err) {
     t.equals(err.code, 'EHTTPSTATUS')
     t.equals(err.statusCode, 413)
+    t.equals(err.message, JSON.stringify({ code: 413, message: 'payload too large', size: 11, maxSize: 1 }, null, 2))
   } finally {
     await close()
   }
@@ -148,10 +149,18 @@ test('upload server timeout', async t => {
     await (new Promise((resolve) => {
       const req = http.request(`${server}/abcd`, { method: 'POST' }, res => {
         t.equals(res.statusCode, 408)
-        res.on('error', () => {
+        const result = []
+        res.on('data', data => result.push(data))
+        res.on('error', err => {
+          t.fail('Unexpected error' + err)
           req.close()
+          resolve()
         })
-        resolve()
+        res.on('close', () => {
+          const message = Buffer.concat(result).toString()
+          t.equals(message, JSON.stringify({ code: 408, message: 'timeout', timeout: 1 }, null, 2))
+          resolve()
+        })
       })
       req.on('error', () => {})
       req.write('msg')
