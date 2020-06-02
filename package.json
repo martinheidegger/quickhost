@@ -10,10 +10,15 @@
     "test": "npm run test:lint && npm run test:unit",
     "test:lint": "standard",
     "test:unit": "tap test.js",
-    "start": "./bin/quickhost"
+    "start": "./bin/quickhost",
+    "release": "standard-version"
   },
   "keywords": [
-    "browserstack", "hosting", "test", "tape", "browsertest"
+    "browserstack",
+    "hosting",
+    "test",
+    "tape",
+    "browsertest"
   ],
   "author": "Martin Heidegger <martin.heidegger@gmail.com>",
   "license": "MIT",
@@ -25,6 +30,7 @@
     "node-fetch": "^2.6.0",
     "p-series": "^2.1.0",
     "standard": "^14.3.4",
+    "standard-version": "^8.0.0",
     "tap": "^14.10.7"
   }
 }
