@@ -26,6 +26,7 @@ module.exports = ({ abortSignal, host, port, max, maxAge, maxSize, timeout, secr
     timeout = 5000
   }
   const lru = createLRU({ max, maxAge })
+  const headerMap = new WeakMap()
   const processUpload = (req, res) => {
     const buffer = []
     let size = 0
@@ -50,8 +51,10 @@ module.exports = ({ abortSignal, host, port, max, maxAge, maxSize, timeout, secr
     const onEnd = () => {
       finish()
       const key = randomBytes(6).toString('hex')
-      lru.set(`/${key}`, Buffer.concat(buffer))
-      res.writeHead(200, 'text/text').end(key)
+      const content = Buffer.concat(buffer)
+      lru.set(`/${key}`, content)
+      headerMap.set(content, { 'Content-Type': req.headers['store-content-type'] || 'text/html' })
+      res.writeHead(200, TEXT_TYPE).end(key)
     }
     const finish = () => {
       clearTimeout(timer)
@@ -75,11 +78,11 @@ module.exports = ({ abortSignal, host, port, max, maxAge, maxSize, timeout, secr
     } else if (req.method !== 'GET') {
       res404(res)
     } else {
-      const data = lru.get(req.url)
-      if (data === undefined) {
+      const content = lru.get(req.url)
+      if (content === undefined) {
         res404(res)
       } else {
-        res.writeHead(200, 'text/html').end(data)
+        res.writeHead(200, headerMap.get(content)).end(content)
       }
     }
   })

@@ -6,12 +6,16 @@ const upload = require('./upload.js')
 const { AbortController } = require('abortcontroller-polyfill/dist/cjs-ponyfill')
 const series = require('p-series')
 
-async function getData (server, key, opts) {
+async function getDataAndType (server, key, opts) {
   const res = await fetch(`${server}/${key}`, opts)
   if (res.status !== 200) {
     throw Object.assign(new Error(`[EHTTPSTATUS] [statusCode=${res.status}] ${await res.text()}`), { statusCode: res.status, code: 'EHTTPSTATUS' })
   }
-  return res.text()
+  return { data: await res.text(), type: res.headers.get('content-type') }
+}
+
+async function getData (server, key, opts) {
+  return (await getDataAndType(server, key, opts)).data
 }
 
 async function createServer (opts) {
@@ -165,6 +169,22 @@ test('upload server timeout', async t => {
       req.on('error', () => {})
       req.write('msg')
     }))
+  } finally {
+    await close()
+  }
+})
+
+test('custom content type', async t => {
+  const { server, close } = await createServer({
+    max: 1,
+    secret: 'abcd'
+  })
+  try {
+    const key = await upload({ server, secret: 'abcd', data: JSON.stringify('hello world'), contentType: 'application/json', timeout: 5000 })
+    t.match(key, /^[0-9a-f]{12}$/)
+    const { data, type } = await getDataAndType(server, key)
+    t.equals(type, 'application/json')
+    t.equals(data, '"hello world"')
   } finally {
     await close()
   }

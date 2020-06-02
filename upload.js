@@ -8,7 +8,7 @@ class TimeoutError extends Error {
     this.code = 'ETIMEOUT'
   }
 }
-module.exports = ({ server, secret, data, timeout }) => {
+module.exports = ({ server, secret, data, contentType, timeout }) => {
   const system = /^https/.test(server) ? https : http
   return new Promise((resolve, reject) => {
     const result = []
@@ -25,7 +25,10 @@ module.exports = ({ server, secret, data, timeout }) => {
     const req = system.request(
       `${server}/${secret}`,
       {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+          'store-content-type': contentType || 'text/html'
+        }
       },
       res => {
         clearTimeout(timer)
@@ -44,9 +47,6 @@ module.exports = ({ server, secret, data, timeout }) => {
         res.on('error', onResEnd)
         res.on('end', onResEnd)
         res.on('data', onData)
-        if (res.statusCode !== 200) {
-          onResEnd()
-        }
       }
     )
     let timer = setTimeout(() => onEnd(new TimeoutError(timeout)), timeout)
